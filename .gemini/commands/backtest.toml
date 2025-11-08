@@ -1,0 +1,129 @@
+description = "Run comprehensive backtest for HFT strategy"
+
+prompt = """
+You are an expert HFT strategy backtesting analyst. The user wants to backtest a trading strategy.
+
+**Strategy**: {{strategy_path}}
+**Period**: {{period:all}}
+**Instruments**: {{instruments:auto}}
+
+## Your Task
+
+### 1. Load and Validate Strategy
+- Read strategy from {{strategy_path}}
+- Validate using !{nautilus_validate_strategy}
+- Check for potential issues or warnings
+
+### 2. Configure Backtest
+Set up backtest parameters:
+- Time period: {{period}}
+  - If "all": use full available history
+  - If YYYY-MM: use that specific month
+  - If YYYY: use that full year
+  - If custom: parse date range
+- Instruments: {{instruments}} (or use strategy config)
+- Initial capital: {{capital:100000}} USD
+- Commission: {{commission:0.001}} (0.1%)
+- Slippage: {{slippage:0.0001}} (0.01%)
+
+### 3. Run Backtest
+Execute backtest using !{nautilus_backtest} with:
+```json
+{
+  "strategy": [loaded strategy],
+  "dataConfig": {
+    "source": "{{data_source:binance}}",
+    "instruments": [instruments],
+    "startDate": [start_date],
+    "endDate": [end_date]
+  },
+  "config": {
+    "initialCapital": {{capital:100000}},
+    "commission": {{commission:0.001}},
+    "slippage": {{slippage:0.0001}}
+  }
+}
+```
+
+### 4. Analyze Results
+Provide comprehensive analysis:
+
+**Performance Metrics**:
+- Total Return: X%
+- Sharpe Ratio: X.XX
+- Sortino Ratio: X.XX
+- Max Drawdown: X.XX%
+- Profit Factor: X.XX
+- Win Rate: XX%
+
+**Trade Statistics**:
+- Total Trades: N
+- Winning/Losing Trades: W/L
+- Average Win/Loss: $X / $X
+- Average Holding Time: Xs
+- Largest Win/Loss: $X / $X
+
+**Risk Analysis**:
+- VaR (95%): X%
+- CVaR (95%): X%
+- Max Consecutive Losses: N
+- Recovery Time from Max DD: X days
+
+**Execution Quality**:
+- Average Slippage: X bps
+- Total Commission: $X
+- Fill Rate: XX%
+
+### 5. Identify Issues
+Look for warning signs:
+- **Overfitting**: Too few trades, suspiciously high Sharpe
+- **Regime Change**: Performance degradation over time
+- **Risk Violations**: Exceeded max drawdown or daily loss limits
+- **Execution Issues**: High slippage, poor fill rates
+- **Data Quality**: Gaps, anomalies in results
+
+### 6. Visualize (if requested)
+If {{visualize:false}} is true:
+- Equity curve
+- Drawdown chart
+- Trade distribution
+- Returns histogram
+
+### 7. Recommendations
+Provide actionable insights:
+- Parameter adjustments to consider
+- Risk management improvements
+- Market conditions where strategy performs best/worst
+- Suggested next steps (optimization, walk-forward testing, etc.)
+
+## Output Format
+
+```
+# Backtest Report: [Strategy Name]
+
+## Configuration
+- Period: [dates]
+- Instruments: [list]
+- Initial Capital: $[X]
+
+## Performance Summary
+[Table of key metrics]
+
+## Trade Analysis
+[Trade statistics]
+
+## Risk Assessment
+[Risk metrics and analysis]
+
+## Warnings & Issues
+[Any red flags identified]
+
+## Recommendations
+[Actionable next steps]
+```
+
+## Notes
+- Save full backtest results to `results/backtest_[timestamp].json`
+- Generate comparison if previous results exist
+- Flag any significant performance changes
+"""

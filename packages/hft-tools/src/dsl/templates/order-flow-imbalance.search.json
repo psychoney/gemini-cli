@@ -1,0 +1,73 @@
+{
+  "searchSpace": {
+    "signals.ofi_signal.params.windowSize": {
+      "type": "int",
+      "low": 5,
+      "high": 50,
+      "step": 5
+    },
+    "signals.ofi_signal.params.threshold": {
+      "type": "float",
+      "low": 0.1,
+      "high": 0.9,
+      "step": 0.05
+    },
+    "signals.ofi_signal.params.minVolume": {
+      "type": "int",
+      "low": 500,
+      "high": 5000,
+      "step": 500
+    },
+    "signals.volume_confirmation.params.volumeThreshold": {
+      "type": "float",
+      "low": 1.2,
+      "high": 3.0,
+      "step": 0.1
+    },
+    "signals.volume_confirmation.params.lookbackPeriod": {
+      "type": "int",
+      "low": 10,
+      "high": 50,
+      "step": 5
+    },
+    "exit.stopLoss.value": {
+      "type": "float",
+      "low": 0.0005,
+      "high": 0.005,
+      "log": true
+    },
+    "exit.takeProfit.value": {
+      "type": "float",
+      "low": 0.001,
+      "high": 0.01,
+      "log": true
+    },
+    "exit.maxHoldingTime": {
+      "type": "int",
+      "low": 10,
+      "high": 120,
+      "step": 10
+    },
+    "riskManagement.positionSizing.value": {
+      "type": "float",
+      "low": 0.5,
+      "high": 2.0,
+      "step": 0.1
+    }
+  },
+  "objective": {
+    "metric": "sharpe_ratio",
+    "direction": "maximize",
+    "constraints": {
+      "maxDrawdown": {
+        "max": 0.05
+      },
+      "minTrades": {
+        "min": 100
+      },
+      "winRate": {
+        "min": 0.45
+      }
+    }
+  }
+}

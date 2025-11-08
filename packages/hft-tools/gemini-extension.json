@@ -1,0 +1,32 @@
+{
+  "name": "hft-tools",
+  "version": "0.1.0",
+  "description": "HFT Strategy Auto-Evolution Tools - AI-powered strategy development, optimization, and backtesting",
+  "main": "dist/index.js",
+  "mcpServers": {
+    "nautilus": {
+      "command": "node",
+      "args": [
+        "${extensionPath}/dist/mcp-servers/nautilus/server.js"
+      ],
+      "env": {
+        "PYTHON_PATH": "${extensionPath}/python",
+        "NODE_ENV": "production"
+      },
+      "description": "NautilusTrader integration for backtesting and validation"
+    },
+    "optuna": {
+      "command": "node",
+      "args": [
+        "${extensionPath}/dist/mcp-servers/optuna/server.js"
+      ],
+      "env": {
+        "PYTHON_PATH": "${extensionPath}/python",
+        "NODE_ENV": "production"
+      },
+      "description": "Optuna integration for hyperparameter optimization"
+    }
+  },
+  "contextFileName": ["hft-context.md"],
+  "commands": []
+}

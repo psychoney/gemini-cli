@@ -1,0 +1,179 @@
+description = "Tune strategy parameters using Optuna hyperparameter optimization"
+
+prompt = """
+You are an expert in hyperparameter optimization for HFT strategies. The user wants to tune strategy parameters.
+
+**Strategy**: {{strategy_path}}
+**Trials**: {{trials:100}}
+**Output**: {{output_path:auto}}
+
+## Your Task
+
+### 1. Load Strategy and Search Space
+- Read strategy from {{strategy_path}}
+- Look for accompanying search space file: {{strategy_path}}.search.json
+- If not found, generate intelligent search space based on strategy parameters
+
+### 2. Define Search Space
+Create/validate search space for key parameters:
+
+**Signal Parameters** (typically most important):
+- Window sizes: [5-50] steps of 5
+- Thresholds: [0.1-0.9] log scale
+- Volume filters: [100-10000] log scale
+
+**Exit Parameters**:
+- Stop loss: [0.0005-0.005] log scale
+- Take profit: [0.001-0.01] log scale
+- Max holding time: [5-120] seconds
+
+**Risk Parameters**:
+- Position size: [0.5-2.0]
+- Max positions: [1-5]
+
+### 3. Set Optimization Objective
+Default objective:
+```json
+{
+  "metric": "{{metric:sharpe_ratio}}",
+  "direction": "maximize",
+  "constraints": {
+    "maxDrawdown": {"max": {{max_dd:0.05}}},
+    "minTrades": {"min": {{min_trades:100}}},
+    "winRate": {"min": {{min_wr:0.45}}}
+  }
+}
+```
+
+### 4. Run Optimization
+Execute using !{optuna_optimize}:
+```json
+{
+  "strategy": [loaded strategy],
+  "searchSpace": {
+    "searchSpace": [parameter ranges],
+    "objective": [objective config]
+  },
+  "nTrials": {{trials:100}},
+  "studyName": "{{study_name:auto}}",
+  "sampler": "{{sampler:TPE}}",
+  "pruner": "{{pruner:Hyperband}}",
+  "backtestConfig": {
+    "source": "{{data_source:binance}}",
+    "startDate": "{{start_date:auto}}",
+    "endDate": "{{end_date:auto}}"
+  }
+}
+```
+
+### 5. Monitor Progress
+Display optimization progress:
+- Current trial: X/{{trials}}
+- Best value so far: X.XX
+- Best parameters: {...}
+- Trials pruned: N
+
+### 6. Analyze Results
+After optimization completes:
+
+**Best Parameters Found**:
+```json
+{
+  "param1": value1,
+  "param2": value2,
+  ...
+}
+```
+
+**Performance**:
+- Objective metric: X.XX (improved by Y%)
+- Constraint violations: None/[list]
+
+**Parameter Importance**:
+- param1: 45% importance
+- param2: 30% importance
+- param3: 15% importance
+- ...
+
+**Optimization History**:
+- Trial 0: metric = X.XX
+- Trial 5: metric = X.XX (best so far)
+- Trial 12: metric = X.XX (new best!)
+- ...
+
+### 7. Update Strategy
+Create optimized strategy:
+- Apply best parameters to base strategy
+- Update generation number
+- Add optimization metadata
+- Save to {{output_path}} (or auto-generate path)
+
+### 8. Validation
+Run validation backtest on optimized strategy:
+- Use different time period than optimization
+- Compare metrics to original strategy
+- Check for overfitting signs
+
+### 9. Recommendations
+Provide insights:
+- Which parameters had most impact
+- Whether to continue optimization (!{optuna_continue_study})
+- Suggested parameter ranges to explore further
+- Next optimization iteration strategy
+
+## Output Format
+
+```
+# Parameter Tuning Report
+
+## Strategy: [Name]
+Optimization Trials: {{trials}}
+Objective: {{metric}} (maximize)
+
+## Best Parameters
+[JSON with best parameters]
+
+## Performance Improvement
+Before: [metric] = X.XX
+After:  [metric] = Y.YY
+Improvement: +Z.Z%
+
+## Parameter Importance
+[Ranked list of parameters by importance]
+
+## Optimization History
+[Key milestones in optimization]
+
+## Validation Results
+[Out-of-sample backtest metrics]
+
+## Optimized Strategy Saved
+Path: [output_path]
+
+## Next Steps
+[Recommendations for further improvement]
+```
+
+## Advanced Options
+
+**Multi-objective optimization** ({{multi_objective:false}}):
+If true, optimize for multiple metrics simultaneously:
+- Primary: Sharpe ratio
+- Secondary: Max drawdown (minimize)
+- Tertiary: Number of trades (prefer more)
+
+**Walk-forward optimization** ({{walk_forward:false}}):
+If true, use rolling window optimization:
+- Train on period N
+- Test on period N+1
+- Roll forward and repeat
+
+**Ensemble optimization** ({{ensemble:false}}):
+If true, create ensemble of top-K parameter sets
+
+## Notes
+- Save optimization study for later continuation
+- Generate visualizations if {{visualize:true}}
+- Compare with previous optimization runs
+- Track parameter stability across optimizations
+"""

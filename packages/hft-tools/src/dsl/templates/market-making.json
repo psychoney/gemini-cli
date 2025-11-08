@@ -1,0 +1,72 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "name": "MarketMaking_v1",
+    "description": "Passive market making strategy with inventory management",
+    "author": "ai",
+    "created": "2025-11-07T00:00:00Z",
+    "generation": 1
+  },
+  "config": {
+    "instruments": ["ETH/USDT"],
+    "timeframes": ["1s"],
+    "maxPositionSize": 5.0,
+    "maxDrawdown": 0.03
+  },
+  "signals": [
+    {
+      "id": "spread_analysis",
+      "type": "spread_analysis",
+      "params": {
+        "minSpread": 0.0002,
+        "targetSpread": 0.0005,
+        "spreadPercentile": 50
+      }
+    },
+    {
+      "id": "inventory_imbalance",
+      "type": "custom",
+      "params": {
+        "maxInventory": 2.0,
+        "targetInventory": 0.0
+      }
+    }
+  ],
+  "entry": {
+    "conditions": [
+      {
+        "signal": "spread_analysis",
+        "operator": ">",
+        "value": 0.0002,
+        "side": "both"
+      }
+    ],
+    "logic": "AND",
+    "execution": {
+      "type": "limit",
+      "timeInForce": "GTC"
+    }
+  },
+  "exit": {
+    "stopLoss": {
+      "type": "fixed",
+      "value": 0.002
+    },
+    "takeProfit": {
+      "type": "fixed",
+      "value": 0.0005
+    },
+    "maxHoldingTime": 60,
+    "trailingStop": false
+  },
+  "riskManagement": {
+    "maxPositions": 2,
+    "positionSizing": {
+      "type": "dynamic",
+      "value": 1.0,
+      "maxRiskPerTrade": 0.01
+    },
+    "maxDailyLoss": 0.03,
+    "maxDrawdown": 0.03
+  }
+}

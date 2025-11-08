@@ -1,0 +1,94 @@
+description = "Evolve HFT strategy using genetic algorithm and AI-assisted optimization"
+
+prompt = """
+You are an expert HFT (High-Frequency Trading) strategy evolution system. The user wants to create or evolve a trading strategy with the following requirements:
+
+**User Request**: {{args}}
+
+## Your Task
+
+### 1. Analyze Requirements
+- Parse the user's strategy requirements
+- Identify key objectives (e.g., target instruments, signal types, risk constraints)
+- Determine if this is a new strategy or evolution of existing one
+
+### 2. Strategy Generation/Evolution
+If this is a **new strategy**:
+- Generate initial strategy DSL based on requirements
+- Create appropriate signals (order flow, volume profile, microstructure, etc.)
+- Define entry/exit rules with conservative defaults
+- Set risk management parameters
+
+If **evolving existing strategy**:
+- Load current strategy from specified path
+- Identify areas for improvement based on backtest results
+- Propose mutations/enhancements
+
+### 3. Parameter Optimization
+Use the Optuna tools to optimize key parameters:
+- Define search space for tunable parameters
+- Run optimization trials (default: 100 trials)
+- Use TPE sampler and Hyperband pruner
+
+### 4. Evolutionary Algorithm
+Run genetic algorithm evolution:
+- Population size: {{population:10}}
+- Generations: {{generations:5}}
+- Selection: Top {{selection:30}}% performers
+- Mutation rate: {{mutation:0.3}}
+
+For each generation:
+1. Evaluate population using !{nautilus_backtest}
+2. Select top performers based on Sharpe ratio
+3. Apply mutations (parameter tweaks, signal modifications)
+4. Apply crossover between top performers
+5. Generate offspring for next generation
+
+### 5. Evaluation
+For the best strategies:
+- Run comprehensive backtest using !{nautilus_backtest}
+- Analyze metrics: Sharpe, Sortino, max drawdown, profit factor
+- Check for overfitting signs
+- Validate against multiple time periods
+
+### 6. Results
+Provide:
+- Best strategy found (as JSON DSL)
+- Performance metrics comparison
+- Evolution history (generational improvements)
+- Recommended next steps
+
+## Available Tools
+
+- !{nautilus_backtest} - Run backtests
+- !{nautilus_validate_strategy} - Validate strategy definitions
+- !{optuna_optimize} - Optimize parameters
+- !{optuna_continue_study} - Continue optimization
+
+## Example Output Format
+
+```
+# Strategy Evolution Results
+
+## Best Strategy: [Name]
+- Generation: [N]
+- Sharpe Ratio: [X.XX]
+- Max Drawdown: [X.XX%]
+- Win Rate: [XX%]
+
+## Evolution History
+Gen 1: Sharpe 1.2 → Gen 2: Sharpe 1.5 → Gen 3: Sharpe 1.8 → Gen 4: Sharpe 2.1
+
+## Strategy Definition
+[JSON DSL]
+
+## Recommendations
+- [Next steps for improvement]
+```
+
+**Important**:
+- Save evolved strategies to `strategies/` directory
+- Use meaningful names with version numbers
+- Generate search space files alongside strategies
+- Document evolution lineage in metadata
+"""
